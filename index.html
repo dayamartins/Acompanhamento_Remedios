@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha de remédios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E6ECE8;
+  --paper:#FFFFFF;
+  --ink:#15303A;
+  --muted:#66787E;
+  --line:#C5D0CC;
+  --accent:#2F7D5B;
+  --accent-soft:#E1EFE6;
+  --warn:#9A5B0C;
+  --warn-soft:#FBF0DC;
+  --danger:#A63D3D;
+  --font:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ---------- Barra superior ---------- */
+.topbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--ink);color:#fff}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:34px;height:34px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-weight:700;font-size:20px}
+.brand h1{font-size:1.25rem;margin:0}
+.brand p{margin:0;font-size:.85rem;opacity:.75}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:700}
+.btn:hover{background:var(--accent-soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#276a4d}
+.topbar .btn{border-color:transparent}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.small{padding:4px 10px;font-size:.85rem;font-weight:400}
+.btn.remove{color:var(--danger)}
+
+/* ---------- Layout ---------- */
+.layout{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:24px;padding:24px;align-items:start}
+@media (max-width:980px){.layout{grid-template-columns:1fr;padding:12px}}
+
+/* ---------- Editor ---------- */
+.editor{display:flex;flex-direction:column;gap:18px}
+.panel{background:var(--paper);border-radius:12px;padding:18px;border:1px solid var(--line)}
+.panel h2{font-size:1.1rem;margin:0 0 12px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field label,.field .lbl{font-size:.85rem;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:#fff;width:100%}
+.field textarea{min-height:64px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:8px;cursor:pointer;color:var(--ink);font-size:.95rem}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--accent);color:#fff;font-weight:700}
+.seg label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:-3px}
+.med-card{border:1px solid var(--line);border-left:6px solid var(--c,#2F7D5B);border-radius:10px;padding:14px;margin-bottom:14px;background:#fff}
+.card-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-top strong{flex:1}
+.swatches{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 12px}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);background:var(--sw);cursor:pointer;padding:0}
+.sw:hover{transform:scale(1.12)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.sw-sep{width:1px;height:22px;background:var(--line);margin:0 2px}
+.sw.add{background:#fff;border:1px dashed var(--muted);box-shadow:none;color:var(--muted);font-size:15px;line-height:1;display:grid;place-items:center}
+.sw.add:hover{color:var(--ink);border-color:var(--ink)}
+.sw.add{position:relative;overflow:hidden}
+.sw.add input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.sw.add:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.my-colors{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 6px}
+.slot{display:flex;align-items:center;gap:2px}
+.slot input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:6px;padding:2px;background:#fff;cursor:pointer}
+.slot button{border:0;background:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0 4px}
+.slot.empty{width:34px;height:30px;border:1px dashed var(--line);border-radius:6px}
+.card-top input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:6px;padding:2px;background:#fff;cursor:pointer}
+.check{display:flex;gap:8px;align-items:center;font-size:.95rem;margin-top:6px}
+.tip{font-size:.85rem;color:var(--muted);margin:6px 0 0}
+.etapa{border:1px dashed var(--line);border-radius:8px;padding:10px;margin:0 0 10px;background:#F8FAF9}
+.etapa-top{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.etapa-top .tip{flex:1;margin:0}
+.etapa-label{font-weight:700;font-size:.9rem;margin:0 0 6px;color:var(--accent)}
+
+/* ---------- Ficha (prévia e impressão) ---------- */
+.preview{position:sticky;top:12px}
+.hint{font-size:.9rem;color:var(--muted);margin:0 0 8px}
+.sheet{background:var(--paper);width:100%;max-width:210mm;margin:0 auto;padding:12mm;box-shadow:0 2px 14px rgba(21,48,58,.12);font-size:11pt;line-height:1.35}
+@media (max-width:600px){.sheet{padding:14px}}
+.sheet-head{display:flex;justify-content:space-between;align-items:stretch;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:10px}
+.sheet-head h1{margin:0;font-size:20pt;line-height:1.1}
+.sheet-head .sub{margin:2px 0 0;color:var(--muted);line-height:1.1}
+.sheet-head .kind{margin:0;font-size:9pt;color:var(--accent);font-weight:700}
+.sheet-head .who{flex:1;min-width:0}
+.logo-box{position:relative;width:min(55mm,38%);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.logo-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:right center}
+.logo-box.empty{border:1px dashed var(--line);border-radius:6px;justify-content:center;color:#B9C4C0;font-size:9pt}
+.infobar{display:flex;flex-wrap:wrap;gap:4px 22px;font-size:9.5pt;margin:0 0 10px;padding:0 0 8px;border-bottom:1px solid var(--line)}
+.infobar span{white-space:nowrap}
+.logo-preview{display:flex;align-items:center;gap:10px;margin-top:6px}
+.logo-preview img{max-height:48px;max-width:140px;object-fit:contain;border:1px solid var(--line);border-radius:4px;padding:2px;background:#fff}
+.allergy{background:var(--warn-soft);color:var(--warn);border:1px solid #E8C98F;border-radius:6px;padding:6px 10px;margin:0 0 10px;font-weight:700}
+.summary{margin:0 0 14px}
+.summary h2{font-size:11pt;margin:0 0 4px}
+.summary table{width:100%;border-collapse:collapse;font-size:9.5pt}
+.summary td{border-bottom:1px solid var(--line);padding:3px 6px;vertical-align:top}
+.summary td:first-child{width:18mm;font-weight:700}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:4px;vertical-align:middle}
+.med{margin-bottom:14px}
+.med-head{display:flex;gap:10px;align-items:flex-start;border-left:5px solid var(--c);padding-left:8px}
+.med-head h3{margin:0;font-size:13.5pt}
+.med-head .dose{font-weight:400}
+.comp{margin:0;font-size:8.5pt;color:#8A989C}
+.plan{margin:2px 0 0;font-size:10pt}
+.instr{margin:4px 0 6px;font-size:10pt;background:#F4F7F5;border-radius:4px;padding:5px 8px}
+.instr p{margin:0}
+.phase{margin-top:10px}
+.phase h4{margin:0;font-size:10.5pt;color:var(--c)}
+.phase .plan{margin:0}
+.week{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:6px;page-break-inside:avoid;break-inside:avoid}
+.week th,.week td{border:1px solid #9FB0AB;text-align:center;padding:0}
+.week th{background:#F1F5F3;font-weight:400;padding:3px 0;font-size:9pt;line-height:1.15}
+.week th b{display:block;font-size:10pt}
+.week th small{display:block;color:var(--muted);font-size:7.5pt}
+.week th.time,.week td.time{width:17mm}
+.week td.time{font-weight:700;font-size:10.5pt;background:#F1F5F3}
+.week td{height:9mm}
+.week td.cell{cursor:pointer;font-size:15pt;font-weight:700;color:var(--c)}
+.week td.cell:hover{background:var(--accent-soft)}
+.week td.off{background:repeating-linear-gradient(135deg,#E8EDEB 0 2px,#fff 2px 6px);cursor:default}
+.week th.void,.week td.void{border:0;background:none}
+.notes{margin-top:14px}
+.notes h2{font-size:11pt;margin:0 0 2px}
+.notes .ln{border-bottom:1px solid var(--line);height:8mm}
+.legend{font-size:8.5pt;color:var(--muted);margin-top:8px}
+.empty{padding:40px 10px;text-align:center;color:var(--muted)}
+.sheet.pagebreak .med + .med{break-before:page;page-break-before:always}
+
+@page{size:A4;margin:10mm}
+@media print{
+  body{background:#fff}
+  .logo-box.empty{border:0;color:transparent}
+  .topbar,.editor,.hint{display:none!important}
+  .layout{display:block;padding:0}
+  .preview{position:static}
+  .sheet{box-shadow:none;padding:0;max-width:none}
+  .week td.cell:hover{background:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">+</div>
+    <div>
+      <h1>Ficha de remédios</h1>
+      <p>Horários e controle de doses para pessoas e animais</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn primary" id="btnPrint">Imprimir ficha</button>
+    <button class="btn ghost" id="btnExport">Salvar arquivo</button>
+    <button class="btn ghost" id="btnImport">Abrir arquivo</button>
+    <button class="btn ghost" id="btnNew">Nova ficha</button>
+    <input type="file" id="fileImport" accept=".json,application/json" hidden>
+    <input type="file" id="logoImport" accept="image/*" hidden>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="editor" id="editor" aria-label="Preencher ficha"></section>
+  <section class="preview" aria-label="Prévia da ficha">
+    <p class="hint">Prévia da impressão. Toque numa casinha para marcar a dose direto na tela.</p>
+    <article class="sheet" id="sheet"></article>
+  </section>
+</main>
+
+<script>
+/* =================== Dados fixos =================== */
+const UNITS = [
+  ['comprimido','comprimidos'],['cápsula','cápsulas'],['drágea','drágeas'],['ml','ml'],['gota','gotas'],
+  ['mg','mg'],['sachê','sachês'],['colher de chá','colheres de chá'],['colher de sopa','colheres de sopa'],
+  ['aplicação','aplicações'],['camada fina','camada fina'],['borrifada','borrifadas'],['jato','jatos'],
+  ['inalação','inalações'],['pipeta','pipetas'],['UI','UI'],['unidade','unidades']
+];
+const VIAS = {
+  oral:'Pela boca (oral)', sublingual:'Embaixo da língua', topico:'Na pele (tópico)', olhos:'Nos olhos (colírio/pomada)',
+  ouvidos:'Nos ouvidos', nariz:'No nariz', inalatorio:'Inalação / bombinha', injetavel:'Injeção',
+  retal:'Retal', vaginal:'Vaginal', outro:'Outra'
+};
+const PLACEHOLDERS = {
+  oral:'Ex.: não partir o comprimido, pode misturar no petisco, dar com bastante água',
+  sublingual:'Ex.: deixar dissolver embaixo da língua, não engolir',
+  topico:'Ex.: limpar e secar a área, aplicar camada fina, não cobrir, lavar as mãos depois',
+  olhos:'Ex.: puxar a pálpebra de baixo, pingar sem encostar o frasco, esperar 5 min entre colírios',
+  ouvidos:'Ex.: pingar no canal do ouvido e massagear a base da orelha por 30 segundos',
+  nariz:'Ex.: assoar o nariz antes, inclinar a cabeça para frente',
+  inalatorio:'Ex.: agitar antes, usar espaçador, enxaguar a boca depois',
+  injetavel:'Ex.: subcutânea, alternar o local de aplicação',
+  retal:'Ex.: deitar de lado, aplicar com cuidado',
+  vaginal:'Ex.: aplicar à noite, antes de dormir',
+  outro:'Descreva como usar'
+};
+const MOMENTOS = [
+  ['', 'Não informado'],
+  ['jejum','Em jejum (30 min antes de comer)'],
+  ['antes','Antes de comer'],
+  ['com','Junto com a comida'],
+  ['apos','Logo depois de comer'],
+  ['dormir','Antes de dormir'],
+  ['qualquer','Não depende da comida']
+];
+const FREQS = [
+  [4,'De 4 em 4 horas (6x ao dia)'],
+  [6,'De 6 em 6 horas (4x ao dia)'],
+  [8,'De 8 em 8 horas (3x ao dia)'],
+  [12,'De 12 em 12 horas (2x ao dia)'],
+  [24,'1 vez ao dia (24 h)'],
+  [48,'Dia sim, dia não'],
+  [72,'A cada 3 dias'],
+  [168,'1 vez por semana'],
+  [0,'Só se necessário (SOS)']
+];
+const FREQ_TXT = {4:'de 4 em 4 horas',6:'de 6 em 6 horas',8:'de 8 em 8 horas',12:'de 12 em 12 horas',
+  24:'1 vez ao dia',48:'dia sim, dia não',72:'a cada 3 dias',168:'1 vez por semana',0:'somente se necessário'};
+const COLORS = ['#2F7D5B','#2B6CB0','#6B46C1','#A63D3D','#B7791F','#4A5568'];
+/* Cores prontas: tons médios/escuros, sem neon, que saem bem em impressora comum */
+const PRESETS = [
+  ['#2F7D5B','Verde'],['#2B6CB0','Azul'],['#6B46C1','Roxo'],
+  ['#A63D3D','Vermelho tijolo'],['#B7791F','Mostarda'],['#4A5568','Grafite']
+];
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const STORAGE_KEY = 'ficha-remedios-v1';
+const COLORS_KEY = 'ficha-remedios-cores';
+const MAX_CORES = 8;
+/* Cores personalizadas ficam salvas à parte: continuam em fichas novas e ao abrir arquivos */
+let customColors = (()=>{ try{ return JSON.parse(localStorage.getItem(COLORS_KEY))||[] }catch(e){ return [] } })();
+function saveColors(){ try{ localStorage.setItem(COLORS_KEY, JSON.stringify(customColors)) }catch(e){} }
+
+/* =================== Utilitários =================== */
+const pad = n => String(n).padStart(2,'0');
+const hm = min => pad(Math.floor(min/60)) + ':' + pad(min%60);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2,9);
+function todayISO(){const t=new Date();return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`}
+function parseDate(s){if(!s)return null;const [y,m,d]=s.split('-').map(Number);if(!y||!m||!d)return null;return new Date(y,m-1,d)}
+function addDays(dt,n){const x=new Date(dt);x.setDate(x.getDate()+n);return x}
+function iso(dt){return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`}
+const ddmm = dt => pad(dt.getDate()) + '/' + pad(dt.getMonth()+1);
+function parseQty(q){
+  const s=String(q||'').trim().replace(',','.');
+  let m=s.match(/^(\d+)\s+(\d+)\/(\d+)$/); if(m) return +m[1] + (+m[2]/+m[3]);
+  m=s.match(/^(\d+)\/(\d+)$/); if(m) return +m[1]/+m[2];
+  const n=parseFloat(s); return isNaN(n)?0:n;
+}
+function fmtDose(m){
+  if(!m.qtd) return '';
+  const u = UNITS.find(x=>x[0]===m.unidade) || [m.unidade,m.unidade];
+  return `${m.qtd} ${parseQty(m.qtd)>1 ? u[1] : u[0]}`;
+}
+
+/* =================== Estado =================== */
+function blankMed(i=0){
+  return {id:uid(), nome:'', composicao:'', qtd:'1', unidade:'comprimido', via:'oral', freq:12, hora:'08:00',
+          dias:7, inicio:'', momento:'', local:'', instrucoes:'', etapas:[], cor:COLORS[i%COLORS.length]};
+}
+function blankState(){
+  return {
+    paciente:{tipo:'pessoa', nome:'', especie:'', tutor:'', peso:'', idade:'', inicio:todayISO(),
+              responsavel:'', crmv:'', telefone:'', alergias:''},
+    logo:'',
+    meds:[blankMed(0)],
+    marks:{},
+    opcoes:{resumo:true, notas:true, quebra:false}
+  };
+}
+let state = load() || blankState();
+function load(){
+  try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return null;const s=JSON.parse(raw);return normalize(s)}catch(e){return null}
+}
+function normalize(s){
+  const b=blankState();
+  return {paciente:{...b.paciente,...(s.paciente||{})}, meds:(s.meds||[]).map((m,i)=>({...blankMed(i),...m})),
+          marks:s.marks||{}, logo:s.logo||'', opcoes:{...b.opcoes,...(s.opcoes||{})}};
+}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+
+/* =================== Cálculo do horário =================== */
+/* Etapa 1 = campos do próprio remédio; etapas seguintes começam quando a anterior termina */
+function phases(m){
+  const base = parseDate(m.inicio) || parseDate(state.paciente.inicio) || parseDate(todayISO());
+  const list = [{qtd:m.qtd, unidade:m.unidade, freq:m.freq, hora:m.hora, dias:m.dias}, ...(m.etapas||[])];
+  let off = 0;
+  return list.map((p,i)=>{
+    const d = Math.max(1, Math.min(366, parseInt(p.dias)||1));
+    const r = {...p, idx:i, start:addDays(base,off)};
+    off += d;
+    return r;
+  });
+}
+function schedule(p){
+  const f = +p.freq;
+  const [hh,mm] = (p.hora||'08:00').split(':').map(Number);
+  const first = (hh||0)*60 + (mm||0);
+  const dias = Math.max(1, Math.min(366, parseInt(p.dias)||1));
+  const start = p.start;
+  if(f===0){
+    return {start, cols:dias, rows:[null,null,null], valid:()=>true, sos:true};
+  }
+  const step = f*60;
+  let times, total;
+  if(f<=24){
+    const per = 24/f;
+    times = []; for(let k=0;k<per;k++) times.push((first + k*step) % 1440);
+    times.sort((a,b)=>a-b);
+    total = dias*per;
+  } else {
+    times = [first];
+    total = Math.ceil(dias*24/f);
+  }
+  const lastAbs = first + (total-1)*step;
+  const cols = Math.floor(lastAbs/1440) + 1;
+  const valid = (d,t) => { const diff = d*1440 + t - first; return diff>=0 && diff%step===0 && diff/step < total; };
+  return {start, cols, rows:times, valid, total, first, lastAbs};
+}
+
+/* =================== Editor =================== */
+const editor = document.getElementById('editor');
+const sheet = document.getElementById('sheet');
+
+function opt(list, val){return list.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(val)?' selected':''}>${esc(l)}</option>`).join('')}
+
+function renderEditor(){
+  const p = state.paciente, animal = p.tipo==='animal';
+  editor.innerHTML = `
+  <div class="panel">
+    <h2>${animal?'Animal':'Paciente'}</h2>
+    <div class="field">
+      <span class="lbl">A ficha é para</span>
+      <div class="seg" role="radiogroup">
+        <label><input type="radio" name="tipo" data-p="tipo" value="pessoa"${!animal?' checked':''}>Pessoa</label>
+        <label><input type="radio" name="tipo" data-p="tipo" value="animal"${animal?' checked':''}>Animal</label>
+      </div>
+    </div>
+    <div class="field"><label for="p-nome">Nome</label><input id="p-nome" data-p="nome" value="${esc(p.nome)}" placeholder="${animal?'Ex.: Mel':'Ex.: Dona Maria'}"></div>
+    ${animal?`
+    <div class="row">
+      <div class="field"><label for="p-esp">Espécie / raça</label><input id="p-esp" data-p="especie" value="${esc(p.especie)}" placeholder="Ex.: Cão, SRD"></div>
+      <div class="field"><label for="p-tutor">Tutor</label><input id="p-tutor" data-p="tutor" value="${esc(p.tutor)}"></div>
+    </div>`:''}
+    <div class="row3">
+      <div class="field"><label for="p-peso">Peso (kg)</label><input id="p-peso" data-p="peso" inputmode="decimal" value="${esc(p.peso)}"></div>
+      <div class="field"><label for="p-idade">Idade</label><input id="p-idade" data-p="idade" value="${esc(p.idade)}"></div>
+      <div class="field"><label for="p-ini">Início</label><input id="p-ini" type="date" data-p="inicio" value="${esc(p.inicio)}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="p-resp">${animal?'Veterinário(a)':'Médico(a)'}</label><input id="p-resp" data-p="responsavel" value="${esc(p.responsavel)}"></div>
+      <div class="field"><label for="p-crmv">${animal?'CRMV':'CRM'}</label><input id="p-crmv" data-p="crmv" value="${esc(p.crmv)}" placeholder="${animal?'Ex.: CRMV-PR 12345':'Ex.: CRM-PR 12345'}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="p-tel">Telefone para dúvidas</label><input id="p-tel" type="tel" data-p="telefone" value="${esc(p.telefone)}"></div>
+      <div class="field"><span class="lbl">Logo da ${animal?'clínica':'clínica / consultório'}</span>
+        <div class="logo-preview">
+          ${state.logo?`<img src="${state.logo}" alt="Logo atual">`:''}
+          <button class="btn small" data-act="logo">${state.logo?'Trocar':'Enviar imagem'}</button>
+          ${state.logo?'<button class="btn small remove" data-act="rmlogo">Tirar</button>':''}
+        </div>
+      </div>
+    </div>
+    <div class="field"><label for="p-alerg">Alergias ou cuidados importantes</label><input id="p-alerg" data-p="alergias" value="${esc(p.alergias)}" placeholder="Ex.: alérgico a dipirona"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Remédios</h2>
+    ${state.meds.map((m,i)=>medCard(m,i)).join('')}
+    <button class="btn" data-act="add" style="width:100%">+ Adicionar remédio</button>
+  </div>
+
+  <div class="panel">
+    <h2>Opções da ficha</h2>
+    <label class="check"><input type="checkbox" data-o="resumo"${state.opcoes.resumo?' checked':''}> Mostrar quadro de horários do dia</label>
+    <label class="check"><input type="checkbox" data-o="notas"${state.opcoes.notas?' checked':''}> Espaço para observações e reações</label>
+    <label class="check"><input type="checkbox" data-o="quebra"${state.opcoes.quebra?' checked':''}> Cada remédio em uma página</label>
+    <div class="field" style="margin-top:12px">
+      <span class="lbl">Minhas cores (até ${MAX_CORES}). Toque numa cor para editar.</span>
+      <div class="my-colors">
+        ${Array.from({length:MAX_CORES},(_,i)=>customColors[i]
+          ? `<span class="slot"><input type="color" data-slot="${i}" value="${customColors[i]}" aria-label="Editar cor ${i+1}"><button data-act="rmcor" data-i="${i}" title="Apagar cor" aria-label="Apagar cor ${i+1}">×</button></span>`
+          : (i===customColors.length ? `<label class="sw add" style="width:34px;height:30px;border-radius:6px" title="Adicionar cor">+<input type="color" data-novacor value="#2F7D5B" aria-label="Adicionar cor"></label>` : `<span class="slot empty" aria-hidden="true"></span>`)
+        ).join('')}
+      </div>
+    </div>
+    <p class="tip">Tudo fica salvo neste navegador. Use "Salvar arquivo" para guardar ou enviar a ficha para outra pessoa.</p>
+    <button class="btn small remove" data-act="clearmarks" style="margin-top:8px">Apagar marcações feitas na tela</button>
+  </div>`;
+}
+
+function medCard(m,i){
+  const isOral = m.via==='oral' || m.via==='sublingual';
+  const isPele = m.via==='topico';
+  return `
+  <div class="med-card" data-id="${m.id}" style="--c:${esc(m.cor)}">
+    <div class="card-top">
+      <input type="color" data-f="cor" value="${esc(m.cor)}" aria-label="Cor avulsa deste remédio" title="Escolher uma cor só para este remédio (não salva)">
+      <strong>${esc(m.nome)||'Remédio '+(i+1)}</strong>
+      <button class="btn small" data-act="dup">Duplicar</button>
+      <button class="btn small remove" data-act="del">Remover</button>
+    </div>
+    <div class="swatches" role="group" aria-label="Cores prontas">
+      ${PRESETS.map(([c,n])=>`<button class="sw" data-act="cor" data-cor="${c}" style="--sw:${c}" title="${n}" aria-label="${n}" aria-pressed="${m.cor.toLowerCase()===c.toLowerCase()}"></button>`).join('')}
+      <span class="sw-sep" aria-hidden="true"></span>
+      ${customColors.map(c=>`<button class="sw" data-act="cor" data-cor="${c}" style="--sw:${c}" title="Minha cor ${c}" aria-label="Minha cor ${c}" aria-pressed="${m.cor.toLowerCase()===c.toLowerCase()}"></button>`).join('')}
+      <label class="sw add" title="Criar e salvar uma cor personalizada">+<input type="color" data-novacor value="${esc(m.cor)}" aria-label="Nova cor personalizada"></label>
+    </div>
+    <div class="field"><label>Nome do remédio</label><input data-f="nome" value="${esc(m.nome)}" placeholder="Ex.: Amoxicilina"></div>
+    <div class="field"><label>Composição</label><input data-f="composicao" value="${esc(m.composicao)}" placeholder="Ex.: amoxicilina tri-hidratada 500 mg"></div>
+    ${(m.etapas||[]).length?'<p class="etapa-label">Etapa 1</p>':''}
+    <div class="row">
+      <div class="field"><label>Quantidade</label><input data-f="qtd" value="${esc(m.qtd)}" placeholder="1/2, 2, 2,5" inputmode="decimal"></div>
+      <div class="field"><label>Unidade</label><select data-f="unidade">${opt(UNITS.map(u=>[u[0],u[0]]),m.unidade)}</select></div>
+    </div>
+    <div class="field"><label>Como usar</label><select data-f="via" data-rerender>${opt(Object.entries(VIAS),m.via)}</select></div>
+    <div class="row">
+      <div class="field"><label>Frequência</label><select data-f="freq">${opt(FREQS,m.freq)}</select></div>
+      <div class="field"><label>Horário da 1ª dose</label><input type="time" data-f="hora" value="${esc(m.hora)}"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Duração (dias)</label><input type="number" min="1" max="366" data-f="dias" value="${esc(m.dias)}"></div>
+      <div class="field"><label>Começa em</label><input type="date" data-f="inicio" value="${esc(m.inicio)}" title="Deixe vazio para usar a data de início da ficha"></div>
+    </div>
+    ${(m.etapas||[]).map((e,j)=>`
+    <div class="etapa" data-eid="${e.id}">
+      <div class="etapa-top"><strong>Etapa ${j+2}</strong><span class="tip">começa quando a anterior termina</span><button class="btn small remove" data-act="deletapa">Remover</button></div>
+      <div class="row">
+        <div class="field"><label>Quantidade</label><input data-e="qtd" value="${esc(e.qtd)}" inputmode="decimal"></div>
+        <div class="field"><label>Unidade</label><select data-e="unidade">${opt(UNITS.map(u=>[u[0],u[0]]),e.unidade)}</select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Frequência</label><select data-e="freq">${opt(FREQS,e.freq)}</select></div>
+        <div class="field"><label>Horário da 1ª dose</label><input type="time" data-e="hora" value="${esc(e.hora)}"></div>
+      </div>
+      <div class="field"><label>Duração (dias)</label><input type="number" min="1" max="366" data-e="dias" value="${esc(e.dias)}"></div>
+    </div>`).join('')}
+    <button class="btn small" data-act="addetapa" style="margin-bottom:10px">+ Mudar dose ou frequência depois</button>
+    ${isOral?`<div class="field"><label>Quando dar</label><select data-f="momento">${opt(MOMENTOS,m.momento)}</select></div>`:''}
+    ${isPele?`<div class="field"><label>Onde aplicar</label><input data-f="local" value="${esc(m.local)}" placeholder="Ex.: ferida na pata traseira esquerda"></div>`:''}
+    <div class="field"><label>${isOral?'Outras orientações':'Como aplicar'}</label><textarea data-f="instrucoes" placeholder="${esc(PLACEHOLDERS[m.via]||'')}">${esc(m.instrucoes)}</textarea></div>
+  </div>`;
+}
+
+/* ---- Eventos do editor ---- */
+editor.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.dataset.p){ if(t.type==='radio') return; state.paciente[t.dataset.p]=t.value; }
+  else if(t.dataset.e){
+    const card=t.closest('.med-card'); const m=state.meds.find(x=>x.id===card.dataset.id); if(!m) return;
+    const et=(m.etapas||[]).find(x=>x.id===t.closest('.etapa').dataset.eid); if(!et) return;
+    et[t.dataset.e]= t.dataset.e==='freq' ? +t.value : t.value;
+  }
+  else if(t.dataset.f){
+    const card=t.closest('.med-card'); const m=state.meds.find(x=>x.id===card.dataset.id); if(!m) return;
+    m[t.dataset.f]= t.dataset.f==='freq' ? +t.value : t.value;
+    if(t.dataset.f==='cor') card.style.setProperty('--c',t.value);
+    if(t.dataset.f==='nome') card.querySelector('.card-top strong').textContent = t.value || 'Remédio '+(state.meds.indexOf(m)+1);
+  } else if(t.dataset.o){ state.opcoes[t.dataset.o]=t.checked; }
+  else return;
+  save(); renderSheet();
+});
+editor.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.dataset.p==='tipo'){ state.paciente.tipo=t.value; save(); renderEditor(); renderSheet(); }
+  if(t.hasAttribute('data-rerender')){ renderEditor(); }
+  if(t.dataset.novacor!==undefined){
+    const c=t.value.toUpperCase();
+    if(!customColors.some(x=>x.toUpperCase()===c) && !PRESETS.some(([p])=>p.toUpperCase()===c)){
+      customColors.push(c); if(customColors.length>MAX_CORES) customColors.shift(); saveColors();
+    }
+    const card=t.closest('.med-card');
+    const m=card && state.meds.find(x=>x.id===card.dataset.id);
+    if(m) m.cor=c;
+    save(); renderEditor(); renderSheet();
+  }
+  if(t.dataset.slot!==undefined){
+    const i=+t.dataset.slot, old=customColors[i], nova=t.value;
+    customColors[i]=nova; saveColors();
+    state.meds.forEach(m=>{ if(m.cor.toLowerCase()===old.toLowerCase()) m.cor=nova; });
+    save(); renderEditor(); renderSheet();
+  }
+});
+editor.addEventListener('click', e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const act=b.dataset.act; const card=b.closest('.med-card');
+  const idx = card ? state.meds.findIndex(x=>x.id===card.dataset.id) : -1;
+  if(act==='add') state.meds.push(blankMed(state.meds.length));
+  if(act==='del' && idx>-1){ if(!confirm('Remover este remédio da ficha?')) return; delete state.marks[state.meds[idx].id]; state.meds.splice(idx,1); }
+  if(act==='dup' && idx>-1){ const c={...state.meds[idx], etapas:(state.meds[idx].etapas||[]).map(e=>({...e,id:uid()})), id:uid(), cor:COLORS[(state.meds.length)%COLORS.length]}; state.meds.splice(idx+1,0,c); }
+  if(act==='addetapa' && idx>-1){
+    const m=state.meds[idx]; const ph=phases(m); const last=ph[ph.length-1];
+    (m.etapas ||= []).push({id:uid(), qtd:last.qtd, unidade:last.unidade, freq:last.freq, hora:last.hora, dias:7});
+  }
+  if(act==='deletapa' && idx>-1){
+    const eid=b.closest('.etapa').dataset.eid; const m=state.meds[idx];
+    m.etapas=(m.etapas||[]).filter(e=>e.id!==eid);
+  }
+  if(act==='cor' && idx>-1){ state.meds[idx].cor=b.dataset.cor; }
+  if(act==='rmcor'){ customColors.splice(+b.dataset.i,1); saveColors(); }
+  if(act==='logo'){ logoInput.click(); return; }
+  if(act==='rmlogo'){ state.logo=''; }
+  if(act==='clearmarks'){ if(!confirm('Apagar todas as marcações feitas na tela?')) return; state.marks={}; }
+  save(); renderEditor(); renderSheet();
+});
+
+/* =================== Ficha =================== */
+function renderSheet(){
+  const p=state.paciente, animal=p.tipo==='animal';
+  sheet.classList.toggle('pagebreak', !!state.opcoes.quebra);
+  const sub = [animal?p.especie:'', p.peso?p.peso+' kg':'', p.idade, animal&&p.tutor?'Tutor: '+p.tutor:''].filter(Boolean).map(esc).join(', ');
+  const inicio = parseDate(p.inicio);
+  let html = `
+  <header class="sheet-head">
+    <div class="who">
+      <p class="kind">Ficha de medicação${animal?' veterinária':''}</p>
+      <h1>${esc(p.nome)||'<span style="color:#B9C4C0">Nome</span>'}</h1>
+      ${sub?`<p class="sub">${sub}</p>`:''}
+    </div>
+    <div class="logo-box${state.logo?'':' empty'}">${state.logo?`<img src="${state.logo}" alt="Logo da clínica">`:'Espaço para a logo'}</div>
+  </header>
+  ${(inicio||p.responsavel||p.crmv||p.telefone)?`<div class="infobar">
+    ${inicio?`<span>Início do tratamento: <b>${ddmm(inicio)}/${inicio.getFullYear()}</b></span>`:''}
+    ${(p.responsavel||p.crmv)?`<span>${animal?'Veterinário(a)':'Médico(a)'}: <b>${esc(p.responsavel)}</b>${p.crmv?` ${p.responsavel?'&nbsp;':''}${esc(p.crmv)}`:''}</span>`:''}
+    ${p.telefone?`<span>Dúvidas: <b>${esc(p.telefone)}</b></span>`:''}
+  </div>`:''}
+  ${p.alergias?`<p class="allergy">Atenção: ${esc(p.alergias)}</p>`:''}`;
+
+  if(!state.meds.length){ sheet.innerHTML = html + `<div class="empty">Adicione um remédio para montar a tabela de horários.</div>`; return; }
+
+  if(state.opcoes.resumo) html += summary();
+  html += state.meds.map(medBlock).join('');
+
+  if(state.opcoes.notas){
+    html += `<div class="notes"><h2>Observações, reações ou doses esquecidas</h2>${'<div class="ln"></div>'.repeat(4)}</div>`;
+  }
+  html += `<p class="legend">Marque um X na casinha quando der a dose. Casinhas riscadas não têm dose. Se esquecer uma dose, anote acima e pergunte ao ${animal?'veterinário':'médico ou farmacêutico'} antes de dobrar a próxima.</p>`;
+  sheet.innerHTML = html;
+}
+
+function periodo(p){
+  const s = schedule(p);
+  const end = s.sos ? addDays(s.start, s.cols-1) : addDays(s.start, Math.floor(s.lastAbs/1440));
+  return `${ddmm(s.start)} a ${ddmm(end)}`;
+}
+
+function summary(){
+  const map = {}, others = [];
+  state.meds.forEach(m=>{
+    const ph = phases(m), multi = ph.length>1;
+    ph.forEach(p=>{
+      const item = {m, p, tag: multi ? ` (${periodo(p)})` : ''};
+      const f = +p.freq;
+      if(f>0 && f<=24) schedule(p).rows.forEach(t=>{ (map[t] ||= []).push(item); });
+      else others.push(item);
+    });
+  });
+  const times = Object.keys(map).map(Number).sort((a,b)=>a-b);
+  if(!times.length && !others.length) return '';
+  const line = ({m,p,tag}, extra) => {
+    const mo = momentoTxt(m);
+    const det = [fmtDose(p), extra, mo ? mo.toLowerCase() : ''].filter(Boolean).join(', ');
+    return `<span class="dot" style="--c:${esc(m.cor)}"></span>${esc(m.nome||'Remédio')} <span style="color:var(--muted)">${esc(det)}${esc(tag)}</span>`;
+  };
+  return `<section class="summary"><h2>Horários do dia</h2><table>
+    ${times.map(t=>`<tr><td>${hm(t)}</td><td>${map[t].map(it=>line(it,'')).join('<br>')}</td></tr>`).join('')}
+    ${others.map(it=>`<tr><td>${+it.p.freq===0?'SOS':hm(schedule(it.p).first)}</td><td>${line(it, FREQ_TXT[it.p.freq])}</td></tr>`).join('')}
+  </table></section>`;
+}
+
+function momentoTxt(m){
+  if(!(m.via==='oral'||m.via==='sublingual')||!m.momento) return '';
+  return (MOMENTOS.find(x=>x[0]===m.momento)||['',''])[1];
+}
+
+function planText(p, s){
+  const n = parseInt(p.dias)||1;
+  let plan = [fmtDose(p), FREQ_TXT[p.freq], `por ${n} dia${n>1?'s':''}`].filter(Boolean).join(', ');
+  plan = esc(plan.charAt(0).toUpperCase()+plan.slice(1)+'.');
+  if(!s.sos){
+    const last = addDays(s.start, Math.floor(s.lastAbs/1440));
+    plan += ` Primeira dose ${ddmm(s.start)} às ${hm(s.first)}, última ${ddmm(last)} às ${hm(s.lastAbs%1440)}.`;
+  } else {
+    plan += ` De ${periodo(p)}.`;
+  }
+  return plan;
+}
+
+function weekTables(m, p, s){
+  const marks = state.marks[m.id] || {};
+  const prefix = p.idx>0 ? `e${p.idx}-` : '';
+  let tables = '';
+  for(let c0=0; c0<s.cols; c0+=7){
+    let head = `<th class="time">Horário</th>`;
+    for(let k=0;k<7;k++){
+      const d=c0+k;
+      if(d>=s.cols){ head += `<th class="void"></th>`; continue; }
+      const dt=addDays(s.start,d);
+      head += `<th><b>${DIAS_SEMANA[dt.getDay()]}</b>${ddmm(dt)}<small>dia ${d+1}</small></th>`;
+    }
+    let body='';
+    s.rows.forEach((t,ri)=>{
+      body += `<tr><td class="time">${t===null?'__:__':hm(t)}</td>`;
+      for(let k=0;k<7;k++){
+        const d=c0+k;
+        if(d>=s.cols){ body += `<td class="void"></td>`; continue; }
+        if(!s.valid(d,t)){ body += `<td class="off" aria-label="sem dose"></td>`; continue; }
+        const key = prefix + iso(addDays(s.start,d)) + 'T' + (t===null?'sos'+ri:hm(t));
+        body += `<td class="cell" data-med="${m.id}" data-k="${key}">${marks[key]?'X':''}</td>`;
+      }
+      body += '</tr>';
+    });
+    tables += `<table class="week"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+  return tables;
+}
+
+function medBlock(m){
+  const ph = phases(m), multi = ph.length>1;
+  const dose1 = fmtDose(ph[0]);
+  const instr = [];
+  instr.push(`<p><b>Uso:</b> ${esc(VIAS[m.via]||'')}${m.via==='topico'&&m.local?', '+esc(m.local):''}.</p>`);
+  if(momentoTxt(m)) instr.push(`<p><b>Quando:</b> ${esc(momentoTxt(m))}.</p>`);
+  if(m.instrucoes) instr.push(`<p><b>${(m.via==='oral'||m.via==='sublingual')?'Orientações':'Como aplicar'}:</b> ${esc(m.instrucoes).replace(/\n/g,'<br>')}</p>`);
+
+  let body = '';
+  if(!multi){
+    const s = schedule(ph[0]);
+    body = `<p class="plan">${planText(ph[0], s)}</p>`;
+    var tables = weekTables(m, ph[0], s);
+  } else {
+    const resumo = ph.map((p,i)=>`${i+1}) ${[fmtDose(p), FREQ_TXT[p.freq]].filter(Boolean).join(', ')} por ${parseInt(p.dias)||1} dias`).join('; ');
+    body = `<p class="plan">Tratamento em ${ph.length} etapas: ${esc(resumo)}.</p>`;
+    var tables = ph.map((p,i)=>{
+      const s = schedule(p);
+      return `<div class="phase"><h4>Etapa ${i+1}</h4><p class="plan">${planText(p, s)}</p>${weekTables(m,p,s)}</div>`;
+    }).join('');
+  }
+
+  return `<section class="med" style="--c:${esc(m.cor)}">
+    <div class="med-head">
+      <div>
+        <h3>${esc(m.nome)||'Remédio sem nome'}${dose1&&!multi?` <span class="dose">${esc(dose1)}</span>`:''}</h3>
+        ${m.composicao?`<p class="comp">${esc(m.composicao)}</p>`:''}
+        ${body}
+      </div>
+    </div>
+    <div class="instr">${instr.join('')}</div>
+    ${tables}
+  </section>`;
+}
+
+/* ---- Marcar dose na tela ---- */
+sheet.addEventListener('click', e=>{
+  const td=e.target.closest('td.cell'); if(!td) return;
+  const id=td.dataset.med, k=td.dataset.k;
+  const mk = (state.marks[id] ||= {});
+  if(mk[k]) delete mk[k]; else mk[k]=true;
+  td.textContent = mk[k]?'X':'';
+  save();
+});
+
+/* =================== Botões do topo =================== */
+document.getElementById('btnPrint').onclick = ()=>window.print();
+document.getElementById('btnNew').onclick = ()=>{
+  if(!confirm('Começar uma ficha nova? Os dados do paciente e os remédios serão apagados deste navegador. A logo e os dados do profissional continuam.')) return;
+  const old = state;
+  state = blankState();
+  state.logo = old.logo;
+  state.paciente.tipo = old.paciente.tipo;
+  ['responsavel','crmv','telefone'].forEach(k=>state.paciente[k]=old.paciente[k]);
+  save(); renderEditor(); renderSheet();
+};
+
+/* Logo: reduz a imagem para caber no armazenamento do navegador */
+const logoInput = document.getElementById('logoImport');
+/* Corta bordas vazias (transparentes ou brancas) para a logo encostar na linha certa */
+function trimCanvas(c){
+  const ctx=c.getContext('2d'); const {width:w,height:h}=c;
+  const d=ctx.getImageData(0,0,w,h).data;
+  let x0=w,y0=h,x1=-1,y1=-1;
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    const i=(y*w+x)*4, a=d[i+3];
+    const vazio = a<16 || (d[i]>245 && d[i+1]>245 && d[i+2]>245);
+    if(!vazio){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+  }
+  if(x1<0) return c;
+  const o=document.createElement('canvas'); o.width=x1-x0+1; o.height=y1-y0+1;
+  o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);
+  return o;
+}
+logoInput.onchange = ()=>{
+  const f=logoInput.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=()=>{
+    const max=600, r=Math.min(1, max/Math.max(img.width,img.height));
+    const c=document.createElement('canvas'); c.width=Math.round(img.width*r); c.height=Math.round(img.height*r);
+    const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,c.width,c.height);
+    state.logo = trimCanvas(c).toDataURL('image/png');
+    URL.revokeObjectURL(img.src); logoInput.value='';
+    save(); renderEditor(); renderSheet();
+  };
+  img.onerror=()=>{ alert('Não foi possível ler essa imagem. Use PNG ou JPG.'); logoInput.value=''; };
+  img.src=URL.createObjectURL(f);
+};
+document.getElementById('btnExport').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  const nome = (state.paciente.nome||'ficha').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w]+/g,'-').toLowerCase();
+  a.href = URL.createObjectURL(blob); a.download = `ficha-${nome}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+const fileInput = document.getElementById('fileImport');
+document.getElementById('btnImport').onclick = ()=>fileInput.click();
+fileInput.onchange = async ()=>{
+  const f=fileInput.files[0]; if(!f) return;
+  try{ state = normalize(JSON.parse(await f.text())); save(); renderEditor(); renderSheet(); }
+  catch(e){ alert('Não foi possível abrir: o arquivo precisa ser uma ficha salva por este site (.json).'); }
+  fileInput.value='';
+};
+
+renderEditor();
+renderSheet();
+</script>
+</body>
+</html>
